@@ -1,0 +1,28 @@
+version: '3'
+
+services:
+  nats:
+    image: nats-streaming
+    expose:
+      - "4222"
+    ports:
+      - "8222:8222"
+    container_name: nats
+
+  producer:
+    build: "./producer"
+    container_name: natsiproducer
+    depends_on:
+      - nats
+    environment:
+      - NATS_URI=nats://nats:4222
+
+  consumer:
+    build: "./consumer"
+    restart:  unless-stopped
+    depends_on:
+      - nats
+    volumes:
+      - ./progress.txt:/usr/src/app/progress.txt
+    environment:
+      - NATS_URI=nats://nats:4222
